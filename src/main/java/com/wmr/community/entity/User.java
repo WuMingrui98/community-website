@@ -2,11 +2,13 @@ package com.wmr.community.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Date;
 
 @Getter
 @Setter
+@ToString
 public class User {
 
     private int id;
@@ -20,19 +22,4 @@ public class User {
     private String headerUrl;
     private Date createTime;
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", salt='" + salt + '\'' +
-                ", email='" + email + '\'' +
-                ", type=" + type +
-                ", status=" + status +
-                ", activationCode='" + activationCode + '\'' +
-                ", headerUrl='" + headerUrl + '\'' +
-                ", createTime=" + createTime +
-                '}';
-    }
 }

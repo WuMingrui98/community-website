@@ -1,6 +1,8 @@
 package com.wmr.community.service;
 
+import com.wmr.community.dao.LoginTicketMapper;
 import com.wmr.community.dao.UserMapper;
+import com.wmr.community.entity.LoginTicket;
 import com.wmr.community.entity.User;
 import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.CommunityUtil;
@@ -27,9 +29,16 @@ public class UserService implements CommunityConstant {
 
     private UserMapper userMapper;
 
+    private LoginTicketMapper loginTicketMapper;
+
     private MailClient mailClient;
 
     private TemplateEngine templateEngine;
+
+    @Autowired
+    public void setLoginTicketMapper(LoginTicketMapper loginTicketMapper) {
+        this.loginTicketMapper = loginTicketMapper;
+    }
 
     @Autowired
     public void setTemplateEngine(TemplateEngine templateEngine) {
@@ -72,7 +81,7 @@ public class UserService implements CommunityConstant {
         if (!map.isEmpty()) return map;
         // 进一步完善用户的信息，注册用户
         user.setSalt(CommunityUtil.generateUUID().substring(0, 5));
-        user.setPassword(CommunityUtil.md5(user.getPassword()) + user.getSalt());
+        user.setPassword(CommunityUtil.md5(user.getPassword() + user.getSalt()));
         user.setHeaderUrl(String.format("http://images.nowcoder.com/head/%dt.png", new Random().nextInt(1000)));
         user.setActivationCode(CommunityUtil.generateUUID());
         // 未激活状态
@@ -119,4 +128,59 @@ public class UserService implements CommunityConstant {
         }
         return ACTIVATION_FAILURE;
     }
+
+
+    /**
+     * 完成登录的功能，实现以下小的功能模块
+     * 1. 判断用户是否存在
+     * 2. 判断用户是否激活
+     * 3. 判断密码是否正确（要和salt结合）
+     * 4. 将登录信息保存到login_ticket表
+     * 5. 将登录凭证传给表现层
+     *
+     * @param username 用户名
+     * @param password 密码
+     * @param expiredSeconds 凭证过期时间
+     * @return
+     */
+    public Map<String, String> login(String username, String password, int expiredSeconds) {
+        Map<String, String> map = new HashMap<>();
+        // 1. 判断用户是否存在
+        User user = userMapper.selectByName(username);
+        if (user == null) {
+            map.put("userMsg", "用户不存在!");
+            return map;
+        }
+        // 2. 判断用户是否激活
+        if (user.getStatus() == 0) {
+            map.put("userMsg", "用户未激活!");
+            return map;
+        }
+        // 3. 判断密码是否正确（要和salt结合）
+        if (!user.getPassword().equals(CommunityUtil.md5(password + user.getSalt()))) {
+            map.put("pwdMsg", "密码错误!");
+            return map;
+        }
+        // 4. 将登录信息保存到login_ticket表
+        LoginTicket loginTicket = new LoginTicket();
+        String ticket = CommunityUtil.generateUUID();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(ticket);
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000L));
+        loginTicketMapper.insertLoginTicket(loginTicket);
+        // 5. 将登录凭证传给表现层
+        map.put("ticket", ticket);
+        return map;
+    }
+
+    /**
+     * 完成退出登录的功能，实现以下小的功能模块
+     * 1. 根据ticket将login_ticket表中对应的status从0->1
+     *
+     */
+    public void logout(String ticket) {
+        loginTicketMapper.updateStatus(ticket, 1);
+    }
+
 }

@@ -1,14 +1,18 @@
 package com.wmr.community;
 
 import com.wmr.community.dao.DiscussPostMapper;
+import com.wmr.community.dao.LoginTicketMapper;
 import com.wmr.community.dao.UserMapper;
 import com.wmr.community.entity.DiscussPost;
+import com.wmr.community.entity.LoginTicket;
 import com.wmr.community.entity.User;
+import com.wmr.community.util.CommunityUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.sql.Time;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +23,32 @@ public class MapperTest {
     private UserMapper userMapper;
     @Autowired
     private DiscussPostMapper discussPostMapper;
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
+
+    @Test
+    public void testInsertLoginTicket() {
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setTicket(CommunityUtil.generateUUID());
+        loginTicket.setUserId(151);
+        loginTicket.setExpired(new Date());
+        loginTicket.setStatus(0);
+        loginTicketMapper.insertLoginTicket(loginTicket);
+    }
+
+    @Test
+    public void testSelectByTicket() {
+        String ticket = "8b9b6b2729544be9af79be49c5732596";
+        LoginTicket loginTicket = loginTicketMapper.selectByTicket(ticket);
+        System.out.println(loginTicket);
+    }
+
+    @Test
+    public void updateStatus() {
+        String ticket = "8b9b6b2729544be9af79be49c5732596";
+        int i = loginTicketMapper.updateStatus(ticket, 1);
+        System.out.println(i);
+    }
 
     @Test
     public void DiscussPostMapper() {
@@ -33,7 +63,7 @@ public class MapperTest {
         User user = userMapper.selectById(101);
         System.out.println(user);
 
-        user = userMapper.selectByName("liubei");
+        user = userMapper.selectByName("wmrr22");
         System.out.println(user);
 
         user = userMapper.selectByEmail("nowcoder101@sina.com");
