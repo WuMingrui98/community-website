@@ -1,5 +1,6 @@
 package com.wmr.community.controller;
 
+import com.wmr.community.annotation.LoginRequired;
 import com.wmr.community.entity.User;
 import com.wmr.community.service.UserService;
 import com.wmr.community.util.CommunityUtil;
@@ -52,7 +53,8 @@ public class UserController {
     public void setHostHolder(HostHolder hostHolder) {
         this.hostHolder = hostHolder;
     }
-    
+
+    @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage(){
         return "/site/setting";
@@ -125,7 +127,7 @@ public class UserController {
                 ServletOutputStream outputStream = response.getOutputStream()
         ) {
             byte[] buff = new byte[1024];
-            int len = 0;
+            int len;
             while ((len = fileInputStream.read(buff)) != -1) {
                 outputStream.write(buff, 0, len);
             }
