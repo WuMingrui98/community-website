@@ -197,4 +197,12 @@ public class UserService implements CommunityConstant {
         return userMapper.selectById(userId);
     }
 
+    /**
+     * 更新用户头像
+     * @return 返回1成功，返回0失败
+     */
+    public int updateHeader(int id, String headerUrl) {
+        return userMapper.updateHeader(id, headerUrl);
+    }
+
 }
