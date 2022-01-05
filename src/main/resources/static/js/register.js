@@ -18,7 +18,7 @@ function check_null(str) {
 function check_data() {
 	var pwd1 = $("#password").val();
 	var pwd2 = $("#confirm-password").val();
-	if(pwd1 != pwd2) {
+	if(pwd1 !== pwd2) {
 		$("#confirm-password-msg").text("两次输入的密码不一致!")
 		$("#confirm-password").addClass("is-invalid");
 		return false;

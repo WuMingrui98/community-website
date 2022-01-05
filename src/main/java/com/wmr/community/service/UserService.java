@@ -141,7 +141,7 @@ public class UserService implements CommunityConstant {
      * @param username 用户名
      * @param password 密码
      * @param expiredSeconds 凭证过期时间
-     * @return
+     * @return 返回map，map中封装有错误及凭证相关的消息
      */
     public Map<String, String> login(String username, String password, int expiredSeconds) {
         Map<String, String> map = new HashMap<>();
@@ -198,11 +198,32 @@ public class UserService implements CommunityConstant {
     }
 
     /**
-     * 更新用户头像
+     * 更新用户的头像链接
      * @return 返回1成功，返回0失败
      */
     public int updateHeader(int id, String headerUrl) {
         return userMapper.updateHeader(id, headerUrl);
+    }
+
+    /**
+     * 完成更新密码的功能，实现以下小的功能模块
+     * 1. 查询用户密码，并将输入的原密码与用户密码比较，如果不一致，则返回错误信息
+     * 2. 输入密码与用户原密码一致，则通过持久层更新用户的密码
+     *
+     * @param id 用户id
+     * @param oldPassword 原密码
+     * @param newPassword 新密码
+     * @return 返回错误信息，如果没有出错，则返回null
+     */
+    public String updatePassword(int id, String oldPassword, String newPassword) {
+        // 1. 查询用户密码，并将输入的原密码与用户密码比较，如果不一致，则返回错误信息
+        User user = userMapper.selectById(id);
+        if (!user.getPassword().equals(CommunityUtil.md5(oldPassword + user.getSalt()))) {
+            return "密码错误，请重新输入!";
+        }
+        // 2. 输入密码与用户原密码一致，则通过持久层更新用户的密码
+        userMapper.updatePassword(id, CommunityUtil.md5(newPassword + user.getSalt()));
+        return null;
     }
 
 }

@@ -134,4 +134,23 @@ public class UserController {
         }
     }
 
+    @RequestMapping(path = "/password", method = RequestMethod.POST)
+    public ModelAndView updatePassword(
+            @RequestParam(name = "oldPassword") String oldPassword,
+            @RequestParam(name = "newPassword") String newPassword
+    ) {
+        ModelAndView mv = new ModelAndView();
+        // 获取用户id
+        User user = hostHolder.getUser();
+        int id = user.getId();
+        String error = userService.updatePassword(id, oldPassword, newPassword);
+        if (error != null) {
+            mv.addObject("pwdError", error);
+            mv.setViewName("/site/setting");
+            return mv;
+        }
+        mv.setViewName("redirect:/index");
+        return mv;
+    }
+
 }

@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 public class TestUtil {
     @Test
     public void testCommunityUtil() {
-        System.out.println(CommunityUtil.generateUUID());
-        System.out.println(StringUtils.isBlank(" 2  "));
-        System.out.println(CommunityUtil.md5("123QQQQQ"));
+        System.out.println(CommunityUtil.md5("12345678" + "d0ee9"));
     }
 }
