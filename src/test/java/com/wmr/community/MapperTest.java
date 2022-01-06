@@ -27,6 +27,11 @@ public class MapperTest {
     private LoginTicketMapper loginTicketMapper;
 
     @Test
+    public void testAll() {
+        DiscussPost discussPost = discussPostMapper.selectDiscussPostById(109);
+        System.out.println(discussPost);
+    }
+    @Test
     public void testInsertLoginTicket() {
         LoginTicket loginTicket = new LoginTicket();
         loginTicket.setTicket(CommunityUtil.generateUUID());

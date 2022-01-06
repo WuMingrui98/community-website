@@ -22,6 +22,11 @@
         limit #{offset}, #{limit}
     </select>
 
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="selectFields"/>
+        from discuss_post where id = #{id};
+    </select>
+
     <insert id="insertDiscussPost" parameterType="DiscussPost" keyProperty="id">
         INSERT INTO discuss_post(<include refid="insertFields"/>)
         VALUES(#{userId}, #{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score});
