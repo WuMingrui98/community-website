@@ -23,7 +23,8 @@
     </select>
 
     <select id="selectDiscussPostById" resultType="DiscussPost">
-        select <include refid="selectFields"/>
+        select
+        <include refid="selectFields"/>
         from discuss_post where id = #{id};
     </select>
 
@@ -41,5 +42,11 @@
             and user_id = #{userId}
         </if>
     </select>
+
+    <update id="updateCommentCount">
+        update discuss_post
+        set comment_count = #{commentCount}
+        where id = #{id};
+    </update>
 
 </mapper>

@@ -1,8 +1,10 @@
 package com.wmr.community;
 
+import com.wmr.community.dao.CommentMapper;
 import com.wmr.community.dao.DiscussPostMapper;
 import com.wmr.community.dao.LoginTicketMapper;
 import com.wmr.community.dao.UserMapper;
+import com.wmr.community.entity.Comment;
 import com.wmr.community.entity.DiscussPost;
 import com.wmr.community.entity.LoginTicket;
 import com.wmr.community.entity.User;
@@ -25,11 +27,12 @@ public class MapperTest {
     private DiscussPostMapper discussPostMapper;
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Test
     public void testAll() {
-        DiscussPost discussPost = discussPostMapper.selectDiscussPostById(109);
-        System.out.println(discussPost);
+        discussPostMapper.updateCommentCount(109, 2);
     }
     @Test
     public void testInsertLoginTicket() {

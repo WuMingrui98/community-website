@@ -36,6 +36,14 @@ public class AlphaController {
         return alphaService.select();
     }
 
+
+    @RequestMapping("/test")
+    @ResponseBody
+    public String select(String T1) {
+        System.out.println(T1);
+        return T1;
+    }
+
     @RequestMapping("/http")
     public void http(HttpServletRequest request, HttpServletResponse response) {
         // 获取请求数据

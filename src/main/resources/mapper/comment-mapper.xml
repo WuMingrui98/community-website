@@ -7,17 +7,21 @@
         id, user_id, entity_type, entity_id, target_id, content, status, create_time
     </sql>
 
+    <sql id="insertFields">
+        user_id, entity_type, entity_id, target_id, content, status, create_time
+    </sql>
+
     <select id="selectComments" resultType="Comment">
         SELECT
-            <include refid="selectFields"/>
+        <include refid="selectFields"/>
         FROM
-            `comment`
+        `comment`
         WHERE
-            entity_type = #{entityType}
-          AND entity_id = #{entityId}
-          AND `status` = 0
+        entity_type = #{entityType}
+        AND entity_id = #{entityId}
+        AND `status` = 0
         ORDER BY
-            create_time DESC
+        create_time ASC
         <if test="entityType == 1">
             LIMIT #{offset}, #{limit};
         </if>
@@ -25,14 +29,17 @@
 
 
     <select id="selectCountByEntity" resultType="int">
-        SELECT
-            COUNT( id )
-        FROM
-            `comment`
-        WHERE
-            entity_type = #{entityType}
+        SELECT COUNT(id)
+        FROM `comment`
+        WHERE entity_type = #{entityType}
           AND entity_id = #{entityId}
           AND `status` = 0;
     </select>
+
+    <insert id="insertComment" parameterType="Comment" keyProperty="id">
+        INSERT INTO `comment`
+        (<include refid="insertFields"/>)
+        VALUES (#{userId}, #{entityType}, #{entityId}, #{targetId}, #{content}, #{status}, #{createTime});
+    </insert>
 
 </mapper>
