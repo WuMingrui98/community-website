@@ -1,6 +1,8 @@
 package com.wmr.community.service;
 
+import com.wmr.community.dao.CommentMapper;
 import com.wmr.community.dao.DiscussPostMapper;
+import com.wmr.community.entity.Comment;
 import com.wmr.community.entity.DiscussPost;
 import com.wmr.community.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ public class DiscussPostService {
 
     private SensitiveFilter sensitiveFilter;
 
+    private CommentMapper commentMapper;
+
     @Autowired
     public void setDiscussPostMapper(DiscussPostMapper discussPostMapper) {
         this.discussPostMapper = discussPostMapper;
@@ -23,6 +27,12 @@ public class DiscussPostService {
     @Autowired
     public void setSensitiveFilter(SensitiveFilter sensitiveFilter) {
         this.sensitiveFilter = sensitiveFilter;
+    }
+
+
+    @Autowired
+    public void setCommentMapper(CommentMapper commentMapper) {
+        this.commentMapper = commentMapper;
     }
 
     /**
@@ -73,5 +83,31 @@ public class DiscussPostService {
      */
     public DiscussPost findDiscussPostById(int id) {
         return discussPostMapper.selectDiscussPostById(id);
+    }
+
+
+    /**
+     * 根据分页要求按entityType和entityId查询数据库中的评论或回复
+     * 如果是回复(entityType=2)，不需要分页
+     *
+     * @param entityType 1表示评论 2表示回复
+     * @param entityId 如果entityType=1时，表示当前Comment对象所在的帖子的id; 如果entityType=2时，表示回复的评论的id
+     * @param offset mysql的offset
+     * @param limit mysql的limit
+     * @return 返回评论(回复)列表
+     */
+    public List<Comment> findComments(int entityType, int entityId, int offset, int limit) {
+        return commentMapper.selectComments(entityType, entityId, offset, limit);
+    }
+
+    /**
+     * 根据entityType和entityId返回数据库中评论(回复)的数量
+     *
+     * @param entityType 1表示评论 2表示回复
+     * @param entityId 如果entityType=1时，表示当前Comment对象所在的帖子的id; 如果entityType=2时，表示回复的评论的id
+     * @return 返回数据库中评论(回复)的数量
+     */
+    public int findCommentCount(int entityType, int entityId) {
+        return commentMapper.selectCountByEntity(entityType, entityId);
     }
 }

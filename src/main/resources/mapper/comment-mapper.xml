@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wmr.community.dao.CommentMapper">
+    <sql id="selectFields">
+        id, user_id, entity_type, entity_id, target_id, content, status, create_time
+    </sql>
+
+    <select id="selectComments" resultType="Comment">
+        SELECT
+            <include refid="selectFields"/>
+        FROM
+            `comment`
+        WHERE
+            entity_type = #{entityType}
+          AND entity_id = #{entityId}
+          AND `status` = 0
+        ORDER BY
+            create_time DESC
+        <if test="entityType == 1">
+            LIMIT #{offset}, #{limit};
+        </if>
+    </select>
+
+
+    <select id="selectCountByEntity" resultType="int">
+        SELECT
+            COUNT( id )
+        FROM
+            `comment`
+        WHERE
+            entity_type = #{entityType}
+          AND entity_id = #{entityId}
+          AND `status` = 0;
+    </select>
+
+</mapper>
