@@ -57,4 +57,10 @@ public class HomeController {
         mv.setViewName("/index");
         return mv;
     }
+
+
+    @RequestMapping(path = "/error", method = RequestMethod.GET)
+    public String getErrorPage() {
+        return "/error/500";
+    }
 }
