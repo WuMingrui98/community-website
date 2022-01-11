@@ -26,7 +26,7 @@ import java.util.Map;
 
 @Controller
 public class LoginController implements CommunityConstant {
-    private final Logger logger = LoggerFactory.getLogger(LoginController.class);
+    private final static Logger logger = LoggerFactory.getLogger(LoginController.class);
     private UserService userService;
 
     private Producer kaptchaProducer;
