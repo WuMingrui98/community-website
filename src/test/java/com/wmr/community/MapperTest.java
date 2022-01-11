@@ -1,13 +1,7 @@
 package com.wmr.community;
 
-import com.wmr.community.dao.CommentMapper;
-import com.wmr.community.dao.DiscussPostMapper;
-import com.wmr.community.dao.LoginTicketMapper;
-import com.wmr.community.dao.UserMapper;
-import com.wmr.community.entity.Comment;
-import com.wmr.community.entity.DiscussPost;
-import com.wmr.community.entity.LoginTicket;
-import com.wmr.community.entity.User;
+import com.wmr.community.dao.*;
+import com.wmr.community.entity.*;
 import com.wmr.community.util.CommunityUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +23,14 @@ public class MapperTest {
     private LoginTicketMapper loginTicketMapper;
     @Autowired
     private CommentMapper commentMapper;
+    @Autowired
+    private MessageMapper messageMapper;
 
     @Test
     public void testAll() {
-        discussPostMapper.updateCommentCount(109, 2);
+//        List<Message> messages = messageMapper.selectConversations(111, 0, 5);
+//        System.out.println(messages);
+        System.out.println(messageMapper.selectLetterUnreadCount(111, null));
     }
     @Test
     public void testInsertLoginTicket() {

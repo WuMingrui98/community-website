@@ -32,7 +32,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String ticket = CookieUtil.getValue(request, "ticket");
-        User user = userService.getUserByTicket(ticket);
+        User user = userService.findUserByTicket(ticket);
         hostHolder.setUser(user);
         return true;
     }

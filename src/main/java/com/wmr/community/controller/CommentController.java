@@ -35,7 +35,7 @@ public class CommentController {
 
     @RequestMapping(value = "/add/{discussPostId}", method = RequestMethod.POST)
     public String addComment(@PathVariable(name = "discussPostId") int id, Comment comment) {
-        // 通过hostHolder获取当前登录的用户
+        // 通过hostHolder获取当前登录的用      户
         User user = hostHolder.getUser();
         comment.setUserId(user.getId());
         comment.setStatus(0);

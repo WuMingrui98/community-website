@@ -188,7 +188,7 @@ public class UserService implements CommunityConstant {
      * @param ticket 登录凭证
      * @return 返回通过登录凭证查询到的用户，如果凭证无效或者过期返回null
      */
-    public User getUserByTicket(String ticket) {
+    public User findUserByTicket(String ticket) {
         LoginTicket loginTicket = loginTicketMapper.selectByTicket(ticket);
         if (loginTicket == null || loginTicket.getStatus() == 1 || !loginTicket.getExpired().after(new Date())) {
             return null;
