@@ -55,8 +55,22 @@ public class UserService implements CommunityConstant {
         this.userMapper = userMapper;
     }
 
+    /**
+     * 通过用户id查找用户
+     * @param id 用户id
+     * @return 返回持久层查到的用户
+     */
     public User findUserById(int id) {
         return userMapper.selectById(id);
+    }
+
+    /**
+     * 通过用户名查找用户
+     * @param username 用户名
+     * @return 返回持久层查到的用户
+     */
+    public User findUserByName(String username) {
+        return userMapper.selectByName(username);
     }
 
     /**

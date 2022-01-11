@@ -24,4 +24,8 @@ public class Message {
     private int status;
     // 私信创建时间
     private Date createTime;
+
+    public void setConversationId() {
+        this.conversationId =  fromId < toId ? fromId + "_" + toId : toId + "_" + fromId;
+    }
 }

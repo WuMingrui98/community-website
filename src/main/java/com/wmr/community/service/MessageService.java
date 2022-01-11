@@ -2,8 +2,10 @@ package com.wmr.community.service;
 
 import com.wmr.community.dao.MessageMapper;
 import com.wmr.community.entity.Message;
+import com.wmr.community.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -11,9 +13,16 @@ import java.util.List;
 public class MessageService {
     private MessageMapper messageMapper;
 
+    private SensitiveFilter sensitiveFilter;
+
     @Autowired
     public void setMessageMapper(MessageMapper messageMapper) {
         this.messageMapper = messageMapper;
+    }
+
+    @Autowired
+    public void setSensitiveFilter(SensitiveFilter sensitiveFilter) {
+        this.sensitiveFilter = sensitiveFilter;
     }
 
     /**
@@ -64,5 +73,30 @@ public class MessageService {
      */
     public int findLetterUnreadCount(int userId, String conversationId) {
         return messageMapper.selectLetterUnreadCount(userId, conversationId);
+    }
+
+
+    /**
+     * 完成发送私信的功能，实现以下小的功能模块
+     * 1. 对message中的内容进行html转义和敏感词过滤
+     * 2. 通过持久层将message保存到数据库
+     * @param message 封装好的Message对象
+     * @return 返回持久层的插入结果
+     */
+    public int sendLetter(Message message) {
+        String content = HtmlUtils.htmlEscape(message.getContent());
+        content = sensitiveFilter.filter(content);
+        message.setContent(content);
+        return messageMapper.insertMessage(message);
+    }
+
+
+    /**
+     * 实现查看私信的功能，通过持久层修改输入私信id对应的status=1
+     * @param ids 私信id列表
+     * @return 返回持久层的修改结果
+     */
+    public int readMessage(List<Integer> ids) {
+        return messageMapper.updateStatus(ids, 1);
     }
 }

@@ -5,19 +5,16 @@ import com.wmr.community.entity.Page;
 import com.wmr.community.entity.User;
 import com.wmr.community.service.MessageService;
 import com.wmr.community.service.UserService;
+import com.wmr.community.util.CommunityUtil;
 import com.wmr.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@RequestMapping("/letter")
 @Controller
 public class MessageController {
     private HostHolder hostHolder;
@@ -41,7 +38,7 @@ public class MessageController {
         this.userService = userService;
     }
 
-    @RequestMapping(path = "/letter/list", method = RequestMethod.GET)
+    @RequestMapping(path = "/list", method = RequestMethod.GET)
     public ModelAndView getConversationList(Page page) {
         ModelAndView mv = new ModelAndView();
         User user = hostHolder.getUser();
@@ -70,7 +67,7 @@ public class MessageController {
         return mv;
     }
 
-    @RequestMapping(path = "/letter/detail/{conversationId}")
+    @RequestMapping(path = "/detail/{conversationId}")
     public ModelAndView getLetterDetail(@PathVariable(name = "conversationId") String conversationId, Page page) {
         ModelAndView mv = new ModelAndView();
         User user = hostHolder.getUser();
@@ -83,14 +80,25 @@ public class MessageController {
         List<Map<String, Object>> letters = new ArrayList<>();
         // 查询私信列表
         List<Message> letterList = messageService.findLetters(conversationId, page.getOffset(), page.getLimit());
+        // 未读私信id列表
+        List<Integer> unreadIds = new ArrayList<>();
+
         for (Message letter : letterList) {
+            // 如果私信的状态为0则加入到未读私信id列表，还要判断私信的toId是否为当前的user
+            if (letter.getStatus() == 0 && letter.getToId() == user.getId()) unreadIds.add(letter.getId());
+
             Map<String, Object> map = new HashMap<>();
             map.put("letter", letter);
             map.put("fromUser", userService.findUserById(letter.getFromId()));
             letters.add(map);
         }
-        mv.addObject("letters", letters);
+        if (!unreadIds.isEmpty()) {
+            // 将查询的id设置为已读
+            messageService.readMessage(unreadIds);
+        }
 
+
+        mv.addObject("letters", letters);
         // 设置私信目标
         mv.addObject("target", getLetterTarget(conversationId));
 
@@ -98,6 +106,35 @@ public class MessageController {
 
         return mv;
 
+    }
+
+    @RequestMapping(path = "/send", method = RequestMethod.POST)
+    @ResponseBody
+    public String sendLetter(@RequestParam(name = "toName") String toName,
+                             @RequestParam(name = "content") String content) {
+        User toUser = userService.findUserByName(toName);
+        if (toUser == null) {
+            return CommunityUtil.getJSONString(1, "用户不存在!");
+        }
+        User fromUser = hostHolder.getUser();
+        Message message = new Message();
+        message.setContent(content);
+        message.setCreateTime(new Date());
+        message.setStatus(0);
+        message.setFromId(fromUser.getId());
+        message.setToId(toUser.getId());
+        // 设置会话id
+        message.setConversationId();
+        int res = messageService.sendLetter(message);
+        if (res > 0) {
+            return CommunityUtil.getJSONString(0);
+        } else {
+            return CommunityUtil.getJSONString(1, "发送失败!");
+        }
+    }
+
+    private String getConversationId(int id1, int id2) {
+        return id1 < id2 ? id1 + "_" + id2 : id2 + "_" + id1;
     }
 
     private User getLetterTarget(String conversationId) {
