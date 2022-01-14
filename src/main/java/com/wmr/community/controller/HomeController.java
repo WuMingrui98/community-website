@@ -5,7 +5,9 @@ import com.wmr.community.entity.DiscussPost;
 import com.wmr.community.entity.Page;
 import com.wmr.community.entity.User;
 import com.wmr.community.service.DiscussPostService;
+import com.wmr.community.service.LikeService;
 import com.wmr.community.service.UserService;
+import com.wmr.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
 
     private UserService userService;
     private DiscussPostService discussPostService;
+    private LikeService likeService;
 
     @Autowired
     public void setUserService(UserService userService) {
@@ -32,6 +35,11 @@ public class HomeController {
     @Autowired
     public void setDiscussPostService(DiscussPostService discussPostService) {
         this.discussPostService = discussPostService;
+    }
+
+    @Autowired
+    public void setLikeService(LikeService likeService) {
+        this.likeService = likeService;
     }
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
@@ -46,6 +54,8 @@ public class HomeController {
             for(DiscussPost discussPost : list) {
                 Map<String, Object> map = new HashMap<>();
                 User user = userService.findUserById(discussPost.getUserId());
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, discussPost.getId());
+                map.put("likeCount", likeCount);
                 map.put("user", user);
                 map.put("post", discussPost);
                 discussPosts.add(map);

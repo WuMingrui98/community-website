@@ -20,7 +20,8 @@ import java.util.Date;
 public class ServiceLogAspect {
     private static final Logger logger = LoggerFactory.getLogger(ServiceLogAspect.class);
 
-    @Pointcut("execution(* com.wmr.community.service.*.*(..))")
+    // 排除service包下的set方法
+    @Pointcut("execution(* com.wmr.community.service.*.*(..)) && !execution(* com.wmr.community.service.*.set*(..))")
     public void pointcut() {
     }
 

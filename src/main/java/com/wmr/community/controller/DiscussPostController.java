@@ -6,6 +6,7 @@ import com.wmr.community.entity.Page;
 import com.wmr.community.entity.User;
 import com.wmr.community.service.CommentService;
 import com.wmr.community.service.DiscussPostService;
+import com.wmr.community.service.LikeService;
 import com.wmr.community.service.UserService;
 import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.CommunityUtil;
@@ -27,6 +28,8 @@ public class DiscussPostController implements CommunityConstant {
 
     private CommentService commentService;
 
+    private LikeService likeService;
+
     private HostHolder hostHolder;
 
     @Autowired
@@ -42,6 +45,11 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     public void setCommentService(CommentService commentService) {
         this.commentService = commentService;
+    }
+
+    @Autowired
+    public void setLikeService(LikeService likeService) {
+        this.likeService = likeService;
     }
 
     @Autowired
@@ -75,6 +83,17 @@ public class DiscussPostController implements CommunityConstant {
         ModelAndView mv = new ModelAndView();
         // 帖子
         DiscussPost discussPost = discussPostService.findDiscussPostById(id);
+        // 帖子的点赞
+        long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, id);
+
+
+        // 判断是否登录
+        User loginUser = hostHolder.getUser();
+        boolean login = (loginUser != null);
+        // 当前登录用户对帖子的点赞状态
+        int likeStatus = login ? likeService.findEntityLikeStatus(loginUser.getId(), ENTITY_TYPE_POST, id) : 0;
+
+
         // 作者
         User user = null;
         if (discussPost != null) {
@@ -94,6 +113,11 @@ public class DiscussPostController implements CommunityConstant {
             Map<String, Object> mapComment = new HashMap<>();
             // 评论的信息
             mapComment.put("comment", comment);
+            // 评论的点赞数
+            mapComment.put("likeCount", likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, comment.getId()));
+            // 当前登录用户对评论的点赞状态
+            mapComment.put("likeStatus", login ? likeService.findEntityLikeStatus(loginUser.getId(), ENTITY_TYPE_COMMENT, comment.getId()) : 0);
+
             int count = commentService.findCommentCount(ENTITY_TYPE_COMMENT, comment.getId());
             // 评论的用户信息
             User userComment = userService.findUserById(comment.getUserId());
@@ -104,6 +128,11 @@ public class DiscussPostController implements CommunityConstant {
             List<Comment> replies = commentService.findComments(ENTITY_TYPE_COMMENT, comment.getId(), 0, 0);
             for (Comment reply : replies) {
                 Map<String, Object> mapReply = new HashMap<>();
+                // 回复的点赞数
+                mapReply.put("likeCount", likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT, reply.getId()));
+                // 当前登录用户对评论的点赞状态
+                mapReply.put("likeStatus", login ? likeService.findEntityLikeStatus(loginUser.getId(), ENTITY_TYPE_COMMENT, reply.getId()) : 0);
+
                 // 回复的用户信息
                 User userReply = userService.findUserById(reply.getUserId());
                 mapReply.put("userReply", userReply);
@@ -121,6 +150,8 @@ public class DiscussPostController implements CommunityConstant {
             commentPackage.add(mapComment);
         }
         mv.addObject("post", discussPost);
+        mv.addObject("likeCount", likeCount);
+        mv.addObject("likeStatus", likeStatus);
         mv.addObject("user", user);
         mv.addObject("page", page);
         mv.addObject("commentPackage", commentPackage);
