@@ -81,7 +81,7 @@
                 </h6>
                 <!-- 作者 -->
                 <div class="media pb-3 border-bottom">
-                    <a href="profile.html">
+                    <a th:href="@{|/user/profile/${user.id}|}">
                         <img th:src="${user.headerUrl}" class="align-self-start mr-4 rounded-circle user-header"
                              alt="用户头像">
                     </a>
@@ -92,7 +92,7 @@
                             15:32:18</b>
                             <ul class="d-inline float-right">
                                 <li class="d-inline ml-2">
-                                    <a href="javascript:" class="text-primary" th:onclick="|like(this, 1, ${post.id})|">
+                                    <a href="javascript:" class="text-primary" th:onclick="|like(this, 1, ${post.id}, ${user.id})|">
                                         <b th:text="${likeStatus==1?'已赞':'赞'}">赞</b>
                                         <i th:text="${likeCount}">11</i>
                                     </a>
@@ -129,7 +129,7 @@
                 <ul class="list-unstyled mt-4">
                     <!-- 第1条回帖 -->
                     <li class="media pb-3 pt-3 mb-3 border-bottom" th:each="commPack,commStat:${commentPackage}">
-                        <a href="profile.html">
+                        <a th:href="@{|/user/profile/${commPack.userComment.id}|}">
                             <img th:src="${commPack.userComment.headerUrl}"
                                  class="align-self-start mr-4 rounded-circle user-header" alt="用户头像">
                         </a>
@@ -147,7 +147,7 @@
                                         th:text="${#dates.format(commPack.comment.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b></span>
                                 <ul class="d-inline float-right">
                                     <li class="d-inline ml-2">
-                                        <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${commPack.comment.id})|">
+                                        <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${commPack.comment.id}, ${commPack.userComment.id})|">
                                             <b th:text="${commPack.likeStatus==1?'已赞':'赞'}">赞</b>
                                             (<i th:text="${commPack.likeCount}">1</i>)
                                         </a>
@@ -165,11 +165,11 @@
                                     th:each="replyPack, replyStat:${commPack.replyPackage}">
                                     <div>
 										<span th:if="${replyPack.target==null}">
-											<b class="text-info" th:text="${replyPack.userReply.username}">寒江雪</b>:&nbsp;&nbsp;
+											<b class="text-info" th:text="${replyPack.userReply.username}" th:href="@{|/user/profile/${replyPack.userReply.id}|}">寒江雪</b>:&nbsp;&nbsp;
 										</span>
                                         <span th:if="${replyPack.target!=null}">
-											<i class="text-info" th:text="${replyPack.userReply.username}">Sissi</i> 回复
-											<b class="text-info" th:text="${replyPack.target.username}">寒江雪</b>:&nbsp;&nbsp;
+											<i class="text-info" th:text="${replyPack.userReply.username}" th:href="@{|/user/profile/${replyPack.userReply.id}|}">Sissi</i> 回复
+											<b class="text-info" th:text="${replyPack.target.username}" th:href="@{|/user/profile/${replyPack.target.id}|}">寒江雪</b>:&nbsp;&nbsp;
 										</span>
                                         <span th:utext="${replyPack.reply.content}">这个是直播时间哈，觉得晚的话可以直接看之前的完整录播的~</span>
                                     </div>
@@ -177,7 +177,7 @@
                                         <span th:text="${#dates.format(replyPack.reply.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
                                         <ul class="d-inline float-right">
                                             <li class="d-inline ml-2">
-                                                <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${replyPack.reply.id})|">
+                                                <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${replyPack.reply.id}, ${replyPack.userReply.id})|">
                                                     <b th:text="${replyPack.likeStatus==1?'已赞':'赞'}">赞</b>
                                                     (<i th:text="${replyPack.likeCount}">1</i>)
                                                 </a>

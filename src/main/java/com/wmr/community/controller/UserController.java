@@ -2,6 +2,7 @@ package com.wmr.community.controller;
 
 import com.wmr.community.annotation.LoginRequired;
 import com.wmr.community.entity.User;
+import com.wmr.community.service.LikeService;
 import com.wmr.community.service.UserService;
 import com.wmr.community.util.CommunityUtil;
 import com.wmr.community.util.HostHolder;
@@ -42,11 +43,19 @@ public class UserController {
 
     private UserService userService;
 
+    private LikeService likeService;
+
     private HostHolder hostHolder;
+
 
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setLikeService(LikeService likeService) {
+        this.likeService = likeService;
     }
 
     @Autowired
@@ -136,6 +145,7 @@ public class UserController {
         }
     }
 
+    // 更新密码
     @RequestMapping(path = "/password", method = RequestMethod.POST)
     public ModelAndView updatePassword(
             @RequestParam(name = "oldPassword") String oldPassword,
@@ -155,4 +165,22 @@ public class UserController {
         return mv;
     }
 
+    // 用户主页
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public ModelAndView getProfilePage(@PathVariable("userId") int userId) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户的主页不存在!");
+        }
+
+        // 用户
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("user", user);
+        // 点赞数量
+        mv.addObject("likeCount", likeService.findUserLikeCount(userId));
+
+        mv.setViewName("/site/profile");
+
+        return mv;
+    }
 }

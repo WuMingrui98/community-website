@@ -109,11 +109,11 @@ public class RedisTest {
                 String redisKey = "text:tx";
                 // 启用事务
                 operations.multi();
-                operations.opsForSet().add((K) redisKey, (V) "zhangsan");
-                operations.opsForSet().add((K) redisKey, (V) "lisi");
-                Integer.parseInt("ABC");
-                operations.opsForSet().add((K) redisKey, (V) "wangwu");
-                System.out.println(operations.opsForSet().members((K) redisKey));
+                redisTemplate.opsForSet().add(redisKey, "zhangsan");
+                redisTemplate.opsForSet().add(redisKey, "lisi");
+//                Integer.parseInt("ABC");
+                redisTemplate.opsForSet().add(redisKey, "wangwu");
+                System.out.println(redisTemplate.opsForSet().members(redisKey));
 
                 // 提交事务
                 return operations.exec();
