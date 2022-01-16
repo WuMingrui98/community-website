@@ -2,8 +2,10 @@ package com.wmr.community.controller;
 
 import com.wmr.community.annotation.LoginRequired;
 import com.wmr.community.entity.User;
+import com.wmr.community.service.FollowService;
 import com.wmr.community.service.LikeService;
 import com.wmr.community.service.UserService;
+import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.CommunityUtil;
 import com.wmr.community.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +31,7 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Value("${server.servlet.context-path}")
@@ -45,6 +47,8 @@ public class UserController {
 
     private LikeService likeService;
 
+    private FollowService followService;
+
     private HostHolder hostHolder;
 
 
@@ -56,6 +60,11 @@ public class UserController {
     @Autowired
     public void setLikeService(LikeService likeService) {
         this.likeService = likeService;
+    }
+
+    @Autowired
+    public void setFollowService(FollowService followService) {
+        this.followService = followService;
     }
 
     @Autowired
@@ -179,8 +188,20 @@ public class UserController {
         // 点赞数量
         mv.addObject("likeCount", likeService.findUserLikeCount(userId));
 
+        // 关注数量
+        mv.addObject("followeeCount", followService.findFolloweeCount(userId, ENTITY_TYPE_USER));
+        // 粉丝数量
+        mv.addObject("followerCount", followService.findFollowerCount(userId, ENTITY_TYPE_USER));
+        // 关注状态
+        User loginUser = hostHolder.getUser();
+        boolean hasFollowed = true;
+        if (loginUser == null) {
+            hasFollowed = false;
+        } else {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        mv.addObject("hasFollowed", hasFollowed);
         mv.setViewName("/site/profile");
-
         return mv;
     }
 }
