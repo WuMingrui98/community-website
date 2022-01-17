@@ -1,20 +1,33 @@
 package com.wmr.community.service;
 
+import com.wmr.community.dao.UserMapper;
+import com.wmr.community.entity.User;
+import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 @Service
-public class FollowService {
+public class FollowService implements CommunityConstant {
     private RedisTemplate<String, Object> redisTemplate;
+
+    private UserMapper userMapper;
 
     @Autowired
     public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
+    }
+
+    @Autowired
+    public void setUserMapper(UserMapper userMapper) {
+        this.userMapper = userMapper;
     }
 
     /**
@@ -99,4 +112,53 @@ public class FollowService {
         Double score = redisTemplate.opsForZSet().score(followeeKey, entityId);
         return score != null;
     }
+
+    /**
+     * 实现根据用户id查询用户的关注列表，支持分页功能
+     * @param userId 用户id
+     * @param offset 偏移量
+     * @param limit 显示条数
+     * @return 返回查询到的关注列表，并把相关信息进行封装
+     */
+    public List<Map<String, Object>> findFollowees(int userId, int offset, int limit) {
+        String followeeKey = RedisKeyUtil.getFolloweeKey(userId, ENTITY_TYPE_USER);
+        Set<ZSetOperations.TypedTuple<Object>> followeeInfoSet = redisTemplate.opsForZSet().reverseRangeWithScores(followeeKey, offset, offset + limit - 1);
+        if (followeeInfoSet == null) return null;
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (ZSetOperations.TypedTuple<Object> followeeInfo: followeeInfoSet) {
+            int followeeId = (Integer) followeeInfo.getValue();
+            User followee = userMapper.selectById(followeeId);
+            Map<String, Object> map = new HashMap<>();
+            map.put("followee", followee);
+            map.put("followTime", new Date(Objects.requireNonNull(followeeInfo.getScore()).longValue()));
+            list.add(map);
+        }
+        return list;
+    }
+
+    /**
+     * 实现根据用户id查询用户的粉丝列表，支持分页功能
+     * @param userId 用户id
+     * @param offset 偏移量
+     * @param limit 显示条数
+     * @return 返回查询到的粉丝列表，并把相关信息进行封装
+     */
+    public List<Map<String, Object>> findFollowers(int userId, int offset, int limit) {
+        String followerKey = RedisKeyUtil.getFollowerKey(userId, ENTITY_TYPE_USER);
+        Set<ZSetOperations.TypedTuple<Object>> followerInfoSet = redisTemplate.opsForZSet().reverseRangeWithScores(followerKey, offset, offset + limit - 1);
+        if (followerInfoSet == null) return null;
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (ZSetOperations.TypedTuple<Object> followerInfo: followerInfoSet) {
+            int followerId = (Integer) followerInfo.getValue();
+            User follower = userMapper.selectById(followerId);
+            Map<String, Object> map = new HashMap<>();
+            map.put("follower", follower);
+            map.put("followTime", new Date(Objects.requireNonNull(followerInfo.getScore()).longValue()));
+            list.add(map);
+        }
+        return list;
+    }
+
+
+
 }
