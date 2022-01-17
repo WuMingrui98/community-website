@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.*;
 import java.util.Date;
 
 @Mapper
+@Deprecated
 public interface LoginTicketMapper {
 
     @Select({"SELECT * FROM login_ticket ",
