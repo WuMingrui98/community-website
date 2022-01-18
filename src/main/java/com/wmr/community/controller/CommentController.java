@@ -1,8 +1,13 @@
 package com.wmr.community.controller;
 
 import com.wmr.community.entity.Comment;
+import com.wmr.community.entity.DiscussPost;
+import com.wmr.community.entity.Event;
 import com.wmr.community.entity.User;
+import com.wmr.community.event.EventProducer;
 import com.wmr.community.service.CommentService;
+import com.wmr.community.service.DiscussPostService;
+import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,9 +19,13 @@ import java.util.Date;
 
 @Controller
 @RequestMapping("/comment")
-public class CommentController {
+public class CommentController implements CommunityConstant {
 
     private CommentService commentService;
+
+    private DiscussPostService discussPostService;
+
+    private EventProducer eventProducer;
 
     private HostHolder hostHolder;
 
@@ -26,15 +35,23 @@ public class CommentController {
     }
 
     @Autowired
+    public void setDiscussPostService(DiscussPostService discussPostService) {
+        this.discussPostService = discussPostService;
+    }
+
+    @Autowired
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
+
+    @Autowired
     public void setHostHolder(HostHolder hostHolder) {
         this.hostHolder = hostHolder;
     }
 
 
-
-
     @RequestMapping(value = "/add/{discussPostId}", method = RequestMethod.POST)
-    public String addComment(@PathVariable(name = "discussPostId") int id, Comment comment) {
+    public String addComment(@PathVariable(name = "discussPostId") int discussPostId, Comment comment) {
         // 通过hostHolder获取当前登录的用      户
         User user = hostHolder.getUser();
         comment.setUserId(user.getId());
@@ -42,6 +59,21 @@ public class CommentController {
         comment.setCreateTime(new Date());
         commentService.addComment(comment);
 
-        return "redirect:/discuss/detail/" + id;
+        // 触发评论事件
+        Event event = new Event()
+                .setTopic(TOPIC_COMMENT)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(comment.getEntityType())
+                .setEntityId(comment.getEntityId())
+                .setData("postId", discussPostId);
+        if (comment.getEntityType() == ENTITY_TYPE_POST) {
+            DiscussPost target = discussPostService.findDiscussPostById(comment.getEntityId());
+            event.setEntityUserId(target.getUserId());
+        } else if (comment.getEntityType() == ENTITY_TYPE_COMMENT) {
+            event.setEntityUserId(comment.getTargetId());
+        }
+        eventProducer.fireEvent(event);
+
+        return "redirect:/discuss/detail/" + discussPostId;
     }
 }

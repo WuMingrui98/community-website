@@ -27,6 +27,15 @@
         </if>
     </select>
 
+    <select id="selectCommentById" resultType="Comment">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        `comment`
+        WHERE
+        id = #{id}
+    </select>
+
 
     <select id="selectCountByEntity" resultType="int">
         SELECT COUNT(id)

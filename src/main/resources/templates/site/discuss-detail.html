@@ -92,7 +92,7 @@
                             15:32:18</b>
                             <ul class="d-inline float-right">
                                 <li class="d-inline ml-2">
-                                    <a href="javascript:" class="text-primary" th:onclick="|like(this, 1, ${post.id}, ${user.id})|">
+                                    <a href="javascript:" class="text-primary" th:onclick="|like(this, 1, ${post.id}, ${user.id}, ${post.id})|">
                                         <b th:text="${likeStatus==1?'已赞':'赞'}">赞</b>
                                         <i th:text="${likeCount}">11</i>
                                     </a>
@@ -147,7 +147,7 @@
                                         th:text="${#dates.format(commPack.comment.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b></span>
                                 <ul class="d-inline float-right">
                                     <li class="d-inline ml-2">
-                                        <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${commPack.comment.id}, ${commPack.userComment.id})|">
+                                        <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${commPack.comment.id}, ${commPack.userComment.id}, ${post.id})|">
                                             <b th:text="${commPack.likeStatus==1?'已赞':'赞'}">赞</b>
                                             (<i th:text="${commPack.likeCount}">1</i>)
                                         </a>
@@ -177,7 +177,7 @@
                                         <span th:text="${#dates.format(replyPack.reply.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
                                         <ul class="d-inline float-right">
                                             <li class="d-inline ml-2">
-                                                <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${replyPack.reply.id}, ${replyPack.userReply.id})|">
+                                                <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${replyPack.reply.id}, ${replyPack.userReply.id}, ${post.id})|">
                                                     <b th:text="${replyPack.likeStatus==1?'已赞':'赞'}">赞</b>
                                                     (<i th:text="${replyPack.likeCount}">1</i>)
                                                 </a>

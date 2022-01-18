@@ -1,8 +1,11 @@
 package com.wmr.community.controller;
 
 import com.wmr.community.annotation.LoginRequired;
+import com.wmr.community.entity.Event;
 import com.wmr.community.entity.User;
+import com.wmr.community.event.EventProducer;
 import com.wmr.community.service.LikeService;
+import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.CommunityUtil;
 import com.wmr.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-public class LikeController {
+public class LikeController implements CommunityConstant {
     private LikeService likeService;
     private HostHolder hostHolder;
+    private EventProducer eventProducer;
 
     @Autowired
     public void setLikeService(LikeService likeService) {
@@ -29,9 +33,14 @@ public class LikeController {
         this.hostHolder = hostHolder;
     }
 
+    @Autowired
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
+
     @RequestMapping(path = "/like", method = RequestMethod.POST)
     @ResponseBody
-    public String like(int entityType, int entityId, int entityUserId) {
+    public String like(int entityType, int entityId, int entityUserId, int postId) {
         User user = hostHolder.getUser();
         if (user == null) {
             return CommunityUtil.getJSONString(1, "未登录，不能点赞!");
@@ -48,6 +57,19 @@ public class LikeController {
         Map<String, Object> map = new HashMap<>();
         map.put("likeCount", likeCount);
         map.put("likeStatus", likeStatus);
+
+        // 触发点赞事件(取消点赞不触发)
+        if (likeStatus == 1) {
+            Event event = new Event()
+                    .setTopic(TOPIC_LIKE)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityId(entityId)
+                    .setEntityUserId(entityUserId)
+                    .setData("postId", postId);
+            eventProducer.fireEvent(event);
+        }
+
         return CommunityUtil.getJSONString(0, null, map);
     }
 }

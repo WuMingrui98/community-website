@@ -125,7 +125,7 @@ public class MessageController {
         message.setToId(toUser.getId());
         // 设置会话id
         message.setConversationId();
-        int res = messageService.sendLetter(message);
+        int res = messageService.addMessage(message);
         if (res > 0) {
             return CommunityUtil.getJSONString(0);
         } else {

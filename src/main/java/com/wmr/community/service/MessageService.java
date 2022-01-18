@@ -77,13 +77,13 @@ public class MessageService {
 
 
     /**
-     * 完成发送私信的功能，实现以下小的功能模块
+     * 完成发送消息的功能，实现以下小的功能模块
      * 1. 对message中的内容进行html转义和敏感词过滤
      * 2. 通过持久层将message保存到数据库
      * @param message 封装好的Message对象
      * @return 返回持久层的插入结果
      */
-    public int sendLetter(Message message) {
+    public int addMessage(Message message) {
         String content = HtmlUtils.htmlEscape(message.getContent());
         content = sensitiveFilter.filter(content);
         message.setContent(content);

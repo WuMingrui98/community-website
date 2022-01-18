@@ -1,7 +1,9 @@
 package com.wmr.community.controller;
 
+import com.wmr.community.entity.Event;
 import com.wmr.community.entity.Page;
 import com.wmr.community.entity.User;
+import com.wmr.community.event.EventProducer;
 import com.wmr.community.service.FollowService;
 import com.wmr.community.service.UserService;
 import com.wmr.community.util.CommunityConstant;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class FollowController implements CommunityConstant {
     private FollowService followService;
     private UserService userService;
+    private EventProducer eventProducer;
     private HostHolder hostHolder;
 
     @Autowired
@@ -33,6 +36,11 @@ public class FollowController implements CommunityConstant {
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 
     @Autowired
@@ -48,8 +56,17 @@ public class FollowController implements CommunityConstant {
             return CommunityUtil.getJSONString(1, "未登录，不能关注!");
         }
         followService.follow(user.getId(), entityType, entityId);
-        return CommunityUtil.getJSONString(0, "已关注!");
 
+        // 触发关注事件
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
+
+        return CommunityUtil.getJSONString(0, "已关注!");
     }
 
 
