@@ -99,4 +99,47 @@ public class MessageService {
     public int readMessage(List<Integer> ids) {
         return messageMapper.updateStatus(ids, 1);
     }
+
+    /**
+     * 通过持久层查询某用户在某主题下的最新通知
+     * @param userId 用户id
+     * @param topic 主题
+     * @return 返回查询到的最新通知
+     */
+    public Message findLatestNotice(int userId, String topic) {
+        return messageMapper.selectLatestNotice(userId, topic);
+    }
+
+    /**
+     * 通过持久层查询某用户在某主题下的通知数量
+     * @param userId 用户id
+     * @param topic 主题
+     * @return 返回查询到的通知数量
+     */
+    public int findNoticeCount(int userId, String topic) {
+        return messageMapper.selectNoticeCount(userId, topic);
+    }
+
+
+    /**
+     * 通过持久层查询某用户在某主题下的未读通知数
+     * @param userId 用户id
+     * @param topic 主题
+     * @return 返回查询到的未读通知数
+     */
+    public int findNoticeUnreadCount(int userId, String topic) {
+        return messageMapper.selectNoticeUnreadCount(userId, topic);
+    }
+
+    /**
+     * 通过持久层查询某用户在某主题下的通知列表，支持分页
+     * @param userId 用户id
+     * @param topic 主题
+     * @param offset 偏移量
+     * @param limit 分页大小
+     * @return 返回查询到的通知列表
+     */
+    public List<Message> findNotices(int userId, String topic, int offset, int limit) {
+        return messageMapper.selectNotices(userId, topic, offset, limit);
+    }
 }

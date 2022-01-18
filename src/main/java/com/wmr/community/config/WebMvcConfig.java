@@ -3,6 +3,7 @@ package com.wmr.community.config;
 import com.wmr.community.controller.interceptor.AlphaInterceptor;
 import com.wmr.community.controller.interceptor.LoginRequiredInterceptor;
 import com.wmr.community.controller.interceptor.LoginTicketInterceptor;
+import com.wmr.community.controller.interceptor.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -15,6 +16,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private LoginTicketInterceptor loginTicketInterceptor;
 
     private LoginRequiredInterceptor loginRequiredInterceptor;
+
+    private MessageInterceptor messageInterceptor;
 
     @Autowired
     public void setAlphaInterceptor(AlphaInterceptor alphaInterceptor) {
@@ -31,6 +34,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         this.loginRequiredInterceptor = loginRequiredInterceptor;
     }
 
+    @Autowired
+    public void setMessageInterceptor(MessageInterceptor messageInterceptor) {
+        this.messageInterceptor = messageInterceptor;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 //        registry.addInterceptor(alphaInterceptor)
@@ -43,6 +51,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginRequiredInterceptor)
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
 
+        registry.addInterceptor(messageInterceptor)
+                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
 
     }
 }
