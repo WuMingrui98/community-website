@@ -1,9 +1,7 @@
 package com.wmr.community.controller;
 
-import com.wmr.community.entity.Comment;
-import com.wmr.community.entity.DiscussPost;
-import com.wmr.community.entity.Page;
-import com.wmr.community.entity.User;
+import com.wmr.community.entity.*;
+import com.wmr.community.event.EventProducer;
 import com.wmr.community.service.CommentService;
 import com.wmr.community.service.DiscussPostService;
 import com.wmr.community.service.LikeService;
@@ -32,6 +30,8 @@ public class DiscussPostController implements CommunityConstant {
 
     private HostHolder hostHolder;
 
+    private EventProducer eventProducer;
+
     @Autowired
     public void setDiscussPostService(DiscussPostService discussPostService) {
         this.discussPostService = discussPostService;
@@ -57,6 +57,11 @@ public class DiscussPostController implements CommunityConstant {
         this.hostHolder = hostHolder;
     }
 
+    @Autowired
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
+
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(
@@ -70,6 +75,15 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setTitle(title);
         discussPost.setCreateTime(new Date());
         discussPostService.addDiscussPost(discussPost);
+
+        // 触发发帖事件
+        // 触发帖子相关事件
+        Event event = new Event()
+                .setTopic(TOPIC_POST)
+                .setEntityId(discussPost.getId());
+        eventProducer.fireEvent(event);
+
+
         // 报错的情况,将来统一处理，先假定业务逻辑没有问题
         return CommunityUtil.getJSONString(0, "发布成功");
     }

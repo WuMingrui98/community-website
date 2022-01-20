@@ -1,8 +1,11 @@
 package com.wmr.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.wmr.community.entity.DiscussPost;
 import com.wmr.community.entity.Event;
 import com.wmr.community.entity.Message;
+import com.wmr.community.service.DiscussPostService;
+import com.wmr.community.service.ElasticsearchService;
 import com.wmr.community.service.MessageService;
 import com.wmr.community.util.CommunityConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -22,14 +25,28 @@ public class EventConsumer implements CommunityConstant {
 
     private MessageService messageService;
 
+    private DiscussPostService discussPostService;
+
+    private ElasticsearchService elasticsearchService;
+
     @Autowired
     public void setMessageService(MessageService messageService) {
         this.messageService = messageService;
     }
 
-    // 处理事件的回调函数
+    @Autowired
+    public void setDiscussPostService(DiscussPostService discussPostService) {
+        this.discussPostService = discussPostService;
+    }
+
+    @Autowired
+    public void setElasticsearchService(ElasticsearchService elasticsearchService) {
+        this.elasticsearchService = elasticsearchService;
+    }
+
+    // 处理评论、点赞和关注事件的回调函数
     @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_LIKE, TOPIC_FOLLOW})
-    public void handleEvent(ConsumerRecord<String, String> record) {
+    public void handleMessage(ConsumerRecord<String, String> record) {
         if (record == null || record.value() == null) {
             logger.error("消息内容为空!");
             return;
@@ -58,6 +75,23 @@ public class EventConsumer implements CommunityConstant {
 
         message.setContent(JSONObject.toJSONString(content));
         messageService.addMessage(message);
+    }
 
+
+    // 处理发帖事件的回调函数
+    @KafkaListener(topics = TOPIC_POST)
+    public void handlePostMessage(ConsumerRecord<String, String> record) {
+        if (record == null || record.value() == null) {
+            logger.error("消息内容为空!");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value(), Event.class);
+        if (event == null) {
+            logger.error("消息格式错误!");
+            return;
+        }
+
+        DiscussPost discussPost = discussPostService.findDiscussPostById(event.getEntityId());
+        elasticsearchService.saveDiscussPost(discussPost);
     }
 }

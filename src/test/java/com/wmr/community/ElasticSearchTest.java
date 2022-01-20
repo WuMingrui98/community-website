@@ -41,9 +41,10 @@ public class ElasticSearchTest {
 
     @Test
     public void testInsert() {
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(241));
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(242));
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(243));
+        for (int i = 109; i < 300; i++) {
+            DiscussPost discussPost = discussPostMapper.selectDiscussPostById(i);
+            if (discussPost != null) discussPostRepository.save(discussPost);
+        }
     }
 
     @Test
