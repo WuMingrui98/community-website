@@ -3,6 +3,7 @@ package com.wmr.community.controller.interceptor;
 import com.wmr.community.annotation.LoginRequired;
 import com.wmr.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 
+@Deprecated
 @Component
 public class LoginRequiredInterceptor implements HandlerInterceptor {
     private HostHolder hostHolder;

@@ -5,6 +5,11 @@ import com.wmr.community.service.UserService;
 import com.wmr.community.util.CookieUtil;
 import com.wmr.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,8 +37,18 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String ticket = CookieUtil.getValue(request, "ticket");
-        User user = userService.findUserByTicket(ticket);
-        hostHolder.setUser(user);
+        if (ticket != null) {
+            // 根据凭证查用户
+            User user = userService.findUserByTicket(ticket);
+            // 在本次请求中持有用户
+            hostHolder.setUser(user);
+            // 将登录用户的认证结果存入SecurityContext,以便于Spring Security进行授权
+            if (user != null) {
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        user, user.getPassword(), userService.getAuthorities(user));
+                SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
+            }
+        }
         return true;
     }
 

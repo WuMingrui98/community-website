@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -149,6 +150,8 @@ public class LoginController implements CommunityConstant {
     public String logout(@CookieValue("ticket") String ticket, HttpServletResponse response) {
         // 调用userService的logout服务
         userService.logout(ticket);
+        // 将SpringSecurity中存储的凭证token清除
+        SecurityContextHolder.clearContext();
         return "redirect:/login";
     }
 }

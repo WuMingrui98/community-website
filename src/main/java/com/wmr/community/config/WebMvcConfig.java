@@ -11,28 +11,28 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    private AlphaInterceptor alphaInterceptor;
+//    private AlphaInterceptor alphaInterceptor;
 
     private LoginTicketInterceptor loginTicketInterceptor;
 
-    private LoginRequiredInterceptor loginRequiredInterceptor;
+//    private LoginRequiredInterceptor loginRequiredInterceptor;
 
     private MessageInterceptor messageInterceptor;
 
-    @Autowired
-    public void setAlphaInterceptor(AlphaInterceptor alphaInterceptor) {
-        this.alphaInterceptor = alphaInterceptor;
-    }
+//    @Autowired
+//    public void setAlphaInterceptor(AlphaInterceptor alphaInterceptor) {
+//        this.alphaInterceptor = alphaInterceptor;
+//    }
 
     @Autowired
     public void setLoginTicketInterceptor(LoginTicketInterceptor loginTicketInterceptor) {
         this.loginTicketInterceptor = loginTicketInterceptor;
     }
 
-    @Autowired
-    public void setLoginRequiredInterceptor(LoginRequiredInterceptor loginRequiredInterceptor) {
-        this.loginRequiredInterceptor = loginRequiredInterceptor;
-    }
+//    @Autowired
+//    public void setLoginRequiredInterceptor(LoginRequiredInterceptor loginRequiredInterceptor) {
+//        this.loginRequiredInterceptor = loginRequiredInterceptor;
+//    }
 
     @Autowired
     public void setMessageInterceptor(MessageInterceptor messageInterceptor) {
@@ -48,8 +48,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginTicketInterceptor)
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
 
-        registry.addInterceptor(loginRequiredInterceptor)
-                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
+//        registry.addInterceptor(loginRequiredInterceptor)
+//                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
 
         registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png", "/**/*.jpg", "/**/*.jpeg");
