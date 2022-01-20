@@ -78,7 +78,7 @@ public class EventConsumer implements CommunityConstant {
     }
 
 
-    // 处理发帖事件的回调函数
+    // 处理发帖相关事件的回调函数
     @KafkaListener(topics = TOPIC_POST)
     public void handlePostMessage(ConsumerRecord<String, String> record) {
         if (record == null || record.value() == null) {
@@ -93,5 +93,22 @@ public class EventConsumer implements CommunityConstant {
 
         DiscussPost discussPost = discussPostService.findDiscussPostById(event.getEntityId());
         elasticsearchService.saveDiscussPost(discussPost);
+    }
+
+    // 处理删帖事件的回调函数
+    @KafkaListener(topics = TOPIC_DELETE)
+    public void handleDeleteMessage(ConsumerRecord<String, String> record) {
+        if (record == null || record.value() == null) {
+            logger.error("消息内容为空!");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value(), Event.class);
+        if (event == null) {
+            logger.error("消息格式错误!");
+            return;
+        }
+
+        DiscussPost discussPost = discussPostService.findDiscussPostById(event.getEntityId());
+        elasticsearchService.deleteDiscussPost(discussPost);
     }
 }

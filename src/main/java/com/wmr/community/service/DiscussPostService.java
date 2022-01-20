@@ -81,5 +81,26 @@ public class DiscussPostService {
     }
 
 
+    /**
+     * 更新帖子的类型
+     * @param id 帖子id
+     * @param type 帖子类型 '0-普通; 1-置顶;'
+     * @return 返回持久层返回的更新数
+     */
+    public int updateType(int id, int type) {
+        return discussPostMapper.updateType(id, type);
+    }
+
+    /**
+     * 更新帖子的状态
+     * @param id 帖子id
+     * @param status 帖子状态 '0-正常; 1-精华; 2-拉黑;'
+     * @return 返回持久层返回的更新数
+     */
+    public int updateStatus(int id, int status) {
+        return discussPostMapper.updateStatus(id, status);
+    }
+
+
 
 }

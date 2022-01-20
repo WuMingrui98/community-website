@@ -76,7 +76,6 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setCreateTime(new Date());
         discussPostService.addDiscussPost(discussPost);
 
-        // 触发发帖事件
         // 触发帖子相关事件
         Event event = new Event()
                 .setTopic(TOPIC_POST)
@@ -175,5 +174,75 @@ public class DiscussPostController implements CommunityConstant {
         }
         mv.setViewName("/site/discuss-detail");
         return mv;
+    }
+
+    // 置顶
+    @PostMapping(path = "/top")
+    @ResponseBody
+    public String top(int id) {
+        discussPostService.updateType(id, 1);
+
+        // 触发帖子相关事件
+        Event event = new Event()
+                .setTopic(TOPIC_POST)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0, "置顶成功!");
+    }
+
+    // 取消置顶
+    @PostMapping(path = "/notop")
+    @ResponseBody
+    public String noTop(int id) {
+        discussPostService.updateType(id, 0);
+
+        // 触发帖子相关事件
+        Event event = new Event()
+                .setTopic(TOPIC_POST)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0, "取消置顶成功!");
+    }
+
+    // 加精
+    @PostMapping(path = "/wonderful")
+    @ResponseBody
+    public String wonderful(int id) {
+        discussPostService.updateStatus(id, 1);
+
+        // 触发帖子相关事件
+        Event event = new Event()
+                .setTopic(TOPIC_POST)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0, "加精成功!");
+    }
+
+    // 取消加精
+    @PostMapping(path = "/nowonderful")
+    @ResponseBody
+    public String noWonderful(int id) {
+        discussPostService.updateStatus(id, 0);
+
+        // 触发帖子相关事件
+        Event event = new Event()
+                .setTopic(TOPIC_POST)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0, "取消加精成功!");
+    }
+
+    // 删除
+    @PostMapping(path = "/delete")
+    @ResponseBody
+    public String delete(int id) {
+        discussPostService.updateStatus(id, 2);
+
+        // 触发帖子相关事件
+        Event event = new Event()
+                .setTopic(TOPIC_DELETE)
+                .setEntityId(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0, "删除成功!");
     }
 }

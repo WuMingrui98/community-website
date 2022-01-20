@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -74,9 +74,15 @@
                     <img src="http://static.nowcoder.com/images/img/icons/ico-discuss.png"/>
                     <span th:utext="${post.title}">备战春招，面试刷题跟他复习，一个月全搞定！</span>
                     <div class="float-right">
-                        <button type="button" class="btn btn-danger btn-sm">置顶</button>
-                        <button type="button" class="btn btn-danger btn-sm">加精</button>
-                        <button type="button" class="btn btn-danger btn-sm">删除</button>
+                        <input type="hidden" id="postId" th:value="${post.id}">
+                        <button type="button" th:if="${post.status != 2}" th:class="|btn ${post.type == 0? 'btn-danger':'btn-secondary'} btn-sm|" id="topBtn"
+                                th:text="${post.type == 0? '置顶':'取消置顶'}" sec:authorize="hasAnyAuthority('moderator')">置顶
+                        </button>
+                        <button type="button" th:if="${post.status != 2}" th:class="|btn ${post.status == 0? 'btn-danger':'btn-secondary'} btn-sm|" id="wonderfulBtn"
+                                th:text="${post.status == 0? '加精':'取消加精'}" sec:authorize="hasAnyAuthority('moderator')">加精</button>
+                        <button type="button" class="btn btn-danger btn-sm" id="deleteBtn"
+                                th:disabled="${post.status==2}" sec:authorize="hasAnyAuthority('admin')">删除
+                        </button>
                     </div>
                 </h6>
                 <!-- 作者 -->
@@ -92,7 +98,8 @@
                             15:32:18</b>
                             <ul class="d-inline float-right">
                                 <li class="d-inline ml-2">
-                                    <a href="javascript:" class="text-primary" th:onclick="|like(this, 1, ${post.id}, ${user.id}, ${post.id})|">
+                                    <a href="javascript:" class="text-primary"
+                                       th:onclick="|like(this, 1, ${post.id}, ${user.id}, ${post.id})|">
                                         <b th:text="${likeStatus==1?'已赞':'赞'}">赞</b>
                                         <i th:text="${likeCount}">11</i>
                                     </a>
@@ -147,7 +154,8 @@
                                         th:text="${#dates.format(commPack.comment.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b></span>
                                 <ul class="d-inline float-right">
                                     <li class="d-inline ml-2">
-                                        <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${commPack.comment.id}, ${commPack.userComment.id}, ${post.id})|">
+                                        <a href="javascript:" class="text-primary"
+                                           th:onclick="|like(this, 2, ${commPack.comment.id}, ${commPack.userComment.id}, ${post.id})|">
                                             <b th:text="${commPack.likeStatus==1?'已赞':'赞'}">赞</b>
                                             (<i th:text="${commPack.likeCount}">1</i>)
                                         </a>
@@ -165,11 +173,14 @@
                                     th:each="replyPack, replyStat:${commPack.replyPackage}">
                                     <div>
 										<span th:if="${replyPack.target==null}">
-											<b class="text-info" th:text="${replyPack.userReply.username}" th:href="@{|/user/profile/${replyPack.userReply.id}|}">寒江雪</b>:&nbsp;&nbsp;
+											<b class="text-info" th:text="${replyPack.userReply.username}"
+                                               th:href="@{|/user/profile/${replyPack.userReply.id}|}">寒江雪</b>:&nbsp;&nbsp;
 										</span>
                                         <span th:if="${replyPack.target!=null}">
-											<i class="text-info" th:text="${replyPack.userReply.username}" th:href="@{|/user/profile/${replyPack.userReply.id}|}">Sissi</i> 回复
-											<b class="text-info" th:text="${replyPack.target.username}" th:href="@{|/user/profile/${replyPack.target.id}|}">寒江雪</b>:&nbsp;&nbsp;
+											<i class="text-info" th:text="${replyPack.userReply.username}"
+                                               th:href="@{|/user/profile/${replyPack.userReply.id}|}">Sissi</i> 回复
+											<b class="text-info" th:text="${replyPack.target.username}"
+                                               th:href="@{|/user/profile/${replyPack.target.id}|}">寒江雪</b>:&nbsp;&nbsp;
 										</span>
                                         <span th:utext="${replyPack.reply.content}">这个是直播时间哈，觉得晚的话可以直接看之前的完整录播的~</span>
                                     </div>
@@ -177,7 +188,8 @@
                                         <span th:text="${#dates.format(replyPack.reply.createTime,'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
                                         <ul class="d-inline float-right">
                                             <li class="d-inline ml-2">
-                                                <a href="javascript:" class="text-primary" th:onclick="|like(this, 2, ${replyPack.reply.id}, ${replyPack.userReply.id}, ${post.id})|">
+                                                <a href="javascript:" class="text-primary"
+                                                   th:onclick="|like(this, 2, ${replyPack.reply.id}, ${replyPack.userReply.id}, ${post.id})|">
                                                     <b th:text="${replyPack.likeStatus==1?'已赞':'赞'}">赞</b>
                                                     (<i th:text="${replyPack.likeCount}">1</i>)
                                                 </a>
@@ -327,5 +339,6 @@
             crossorigin="anonymous"></script>
     <script th:src="@{/js/global.js}"></script>
     <script th:src="@{/js/like.js}"></script>
+    <script th:src="@{/js/discuss.js}"></script>
 </body>
 </html>

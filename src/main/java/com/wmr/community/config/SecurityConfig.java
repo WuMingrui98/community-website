@@ -48,6 +48,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements Comm
                         AUTHORITY_MODERATOR,
                         AUTHORITY_USER
                 )
+                .antMatchers(
+                        "/discuss/top",
+                        "/discuss/notop",
+                        "/discuss/wonderful",
+                        "/discuss/nowonderful"
+                )
+                .hasAnyAuthority(
+                        AUTHORITY_MODERATOR
+                )
+                .antMatchers(
+                        "/discuss/delete"
+                )
+                .hasAnyAuthority(
+                        AUTHORITY_ADMIN
+                )
                 .anyRequest().permitAll();
 
         // 手动关闭CSRF攻击配置
