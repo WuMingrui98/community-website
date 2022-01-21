@@ -60,7 +60,7 @@ public class MapperTest {
     public void DiscussPostMapper() {
         int i = discussPostMapper.selectDiscussPostRows(0);
         System.out.println(i);
-        List<DiscussPost> discussPosts = discussPostMapper.selectDiscussPosts(0, 0, 10);
+        List<DiscussPost> discussPosts = discussPostMapper.selectDiscussPosts(0, 0, 10, 1);
         System.out.println(discussPosts);
     }
 

@@ -9,11 +9,15 @@ import com.wmr.community.service.UserService;
 import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.CommunityUtil;
 import com.wmr.community.util.HostHolder;
+import com.wmr.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -31,6 +35,19 @@ public class DiscussPostController implements CommunityConstant {
     private HostHolder hostHolder;
 
     private EventProducer eventProducer;
+
+    private RedisTemplate<String, Object> redisTemplate;
+
+    // 牛客纪元
+    private static final Date epoch;
+
+    static {
+        try {
+            epoch = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2014-08-01 00:00:00");
+        } catch (ParseException e) {
+            throw new RuntimeException("初始化牛客纪元失败!", e);
+        }
+    }
 
     @Autowired
     public void setDiscussPostService(DiscussPostService discussPostService) {
@@ -62,6 +79,11 @@ public class DiscussPostController implements CommunityConstant {
         this.eventProducer = eventProducer;
     }
 
+    @Autowired
+    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(
@@ -74,6 +96,7 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setContent(content);
         discussPost.setTitle(title);
         discussPost.setCreateTime(new Date());
+        discussPost.setScore(calScore(discussPost));
         discussPostService.addDiscussPost(discussPost);
 
         // 触发帖子相关事件
@@ -85,6 +108,16 @@ public class DiscussPostController implements CommunityConstant {
 
         // 报错的情况,将来统一处理，先假定业务逻辑没有问题
         return CommunityUtil.getJSONString(0, "发布成功");
+    }
+
+    /**
+     * 计算帖子的分数
+     * @param post 帖子
+     * @return 返回初始化的帖子的分数
+     */
+    private double calScore(DiscussPost post) {
+        // 分数 = 帖子权重 + 距离天数
+        return (post.getCreateTime().getTime() - epoch.getTime()) / (86400000);
     }
 
     @RequestMapping(path = "/detail/{discussPostId}", method = RequestMethod.GET)
@@ -215,6 +248,11 @@ public class DiscussPostController implements CommunityConstant {
                 .setTopic(TOPIC_POST)
                 .setEntityId(id);
         eventProducer.fireEvent(event);
+
+        // 帖子分数需要计算
+        String postScoreKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postScoreKey, id);
+
         return CommunityUtil.getJSONString(0, "加精成功!");
     }
 
@@ -229,6 +267,11 @@ public class DiscussPostController implements CommunityConstant {
                 .setTopic(TOPIC_POST)
                 .setEntityId(id);
         eventProducer.fireEvent(event);
+
+        // 帖子分数需要计算
+        String postScoreKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postScoreKey, id);
+
         return CommunityUtil.getJSONString(0, "取消加精成功!");
     }
 

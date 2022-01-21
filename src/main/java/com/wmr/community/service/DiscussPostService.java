@@ -35,10 +35,11 @@ public class DiscussPostService {
      * @param userId 用户id
      * @param offset mysql的offset
      * @param limit mysql的limit
+     * @param orderMode 排序的模式: 0表示按照时间，1表示按照分数
      * @return 返回根据分页要求按用户id查询数据库中的帖子
      */
-    public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit) {
-        return discussPostMapper.selectDiscussPosts(userId, offset, limit);
+    public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit, int orderMode) {
+        return discussPostMapper.selectDiscussPosts(userId, offset, limit, orderMode);
     }
 
     /**
@@ -102,5 +103,14 @@ public class DiscussPostService {
     }
 
 
+    /**
+     * 更新帖子的分数
+     * @param id 帖子id
+     * @param score 分数
+     * @return 返回持久层返回的更新数
+     */
+    public int updateScore(int id, double score) {
+        return discussPostMapper.updateScore(id, score);
+    }
 
 }

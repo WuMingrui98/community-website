@@ -11,6 +11,7 @@ public class RedisKeyUtil {
     private static final String PREFIX_USER = "user";
     private static final String PREFIX_UV = "uv";
     private static final String PREFIX_DAU = "dau";
+    private static final String PREFIX_POST = "post";
 
 
     /**
@@ -124,5 +125,13 @@ public class RedisKeyUtil {
      */
     public static String getDAUKey(String startDate, String endDate) {
         return PREFIX_DAU + SPILT + startDate + SPILT + endDate;
+    }
+
+    /**
+     * 获得需要计算分数帖子所存set在redis中对应的key
+     * @return 返回需要计算分数帖子所存set在redis中对应的key
+     */
+    public static String getPostScoreKey() {
+        return PREFIX_POST + SPILT + "score";
     }
 }

@@ -44,11 +44,12 @@ public class HomeController implements CommunityConstant {
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public ModelAndView getIndexPage(Page page,
-                                     @RequestParam(name = "current", required = false, defaultValue = "1") int current) {
+                                     @RequestParam(name = "current", required = false, defaultValue = "1") int current,
+                                     @RequestParam(name = "orderMode", defaultValue = "0") int orderMode) {
         page.setCurrent(current);
-        page.setPath("/index");
+        page.setPath("/index?orderMode=" + orderMode);
         page.setRows(discussPostService.findDiscussPostRows(0));
-        List<DiscussPost> list = discussPostService.findDiscussPosts(0, page.getOffset(), 10);
+        List<DiscussPost> list = discussPostService.findDiscussPosts(0, page.getOffset(), 10, orderMode);
         List<Map<String, Object>> discussPosts = new ArrayList<>();
         if (list != null) {
             for(DiscussPost discussPost : list) {
@@ -63,6 +64,7 @@ public class HomeController implements CommunityConstant {
         }
         ModelAndView mv = new ModelAndView();
         mv.addObject("page", page);
+        mv.addObject("orderMode", orderMode);
         mv.addObject("discussPosts", discussPosts);
         mv.setViewName("/index");
         return mv;

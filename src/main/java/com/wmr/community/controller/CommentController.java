@@ -9,7 +9,9 @@ import com.wmr.community.service.CommentService;
 import com.wmr.community.service.DiscussPostService;
 import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.HostHolder;
+import com.wmr.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,8 @@ public class CommentController implements CommunityConstant {
     private EventProducer eventProducer;
 
     private HostHolder hostHolder;
+
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     public void setCommentService(CommentService commentService) {
@@ -49,6 +53,10 @@ public class CommentController implements CommunityConstant {
         this.hostHolder = hostHolder;
     }
 
+    @Autowired
+    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     @RequestMapping(value = "/add/{discussPostId}", method = RequestMethod.POST)
     public String addComment(@PathVariable(name = "discussPostId") int discussPostId, Comment comment) {
@@ -80,6 +88,10 @@ public class CommentController implements CommunityConstant {
                     .setTopic(TOPIC_POST)
                     .setEntityId(discussPostId);
             eventProducer.fireEvent(event);
+
+            // 帖子分数需要计算
+            String postScoreKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(postScoreKey, discussPostId);
         }
 
         return "redirect:/discuss/detail/" + discussPostId;

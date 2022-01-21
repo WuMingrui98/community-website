@@ -8,7 +8,9 @@ import com.wmr.community.service.LikeService;
 import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.CommunityUtil;
 import com.wmr.community.util.HostHolder;
+import com.wmr.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,6 +24,7 @@ public class LikeController implements CommunityConstant {
     private LikeService likeService;
     private HostHolder hostHolder;
     private EventProducer eventProducer;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     public void setLikeService(LikeService likeService) {
@@ -36,6 +39,11 @@ public class LikeController implements CommunityConstant {
     @Autowired
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
+    }
+
+    @Autowired
+    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
     @RequestMapping(path = "/like", method = RequestMethod.POST)
@@ -68,6 +76,12 @@ public class LikeController implements CommunityConstant {
                     .setEntityUserId(entityUserId)
                     .setData("postId", postId);
             eventProducer.fireEvent(event);
+        }
+
+        if (entityType == ENTITY_TYPE_POST) {
+            // 帖子分数需要计算
+            String postScoreKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(postScoreKey, postId);
         }
 
         return CommunityUtil.getJSONString(0, null, map);
