@@ -9,6 +9,8 @@ public class RedisKeyUtil {
     private static final String PREFIX_KAPTCHA = "kaptcha";
     private static final String PREFIX_TICKET = "ticket";
     private static final String PREFIX_USER = "user";
+    private static final String PREFIX_UV = "uv";
+    private static final String PREFIX_DAU = "dau";
 
 
     /**
@@ -86,4 +88,41 @@ public class RedisKeyUtil {
     }
 
 
+    /**
+     * 获得单日UV在redis中对应的key
+     * @param date 日期
+     * @return 返回单日UV在redis中对应的key
+     */
+    public static String getUVKey(String date) {
+        return PREFIX_UV + SPILT + date;
+    }
+
+    /**
+     * 获得区间UV在redis中对应的key
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @return 返回区间UV在redis中对应的key
+     */
+    public static String getUVKey(String startDate, String endDate) {
+        return PREFIX_UV + SPILT + startDate + SPILT + endDate;
+    }
+
+    /**
+     * 获得单日活跃用户在redis中对应的key
+     * @param date 日期
+     * @return 返回单日活跃用户在redis中对应的key
+     */
+    public static String getDAUKey(String date) {
+        return PREFIX_DAU + SPILT + date;
+    }
+
+    /**
+     * 获得区间活跃用户在redis中对应的key
+     * @param startDate 开始日期
+     * @param endDate 结束日期
+     * @return 返回区间活跃用户在redis中对应的key
+     */
+    public static String getDAUKey(String startDate, String endDate) {
+        return PREFIX_DAU + SPILT + startDate + SPILT + endDate;
+    }
 }
