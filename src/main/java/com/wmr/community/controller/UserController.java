@@ -3,10 +3,11 @@ package com.wmr.community.controller;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
 import com.wmr.community.annotation.LoginRequired;
+import com.wmr.community.entity.Comment;
+import com.wmr.community.entity.DiscussPost;
+import com.wmr.community.entity.Page;
 import com.wmr.community.entity.User;
-import com.wmr.community.service.FollowService;
-import com.wmr.community.service.LikeService;
-import com.wmr.community.service.UserService;
+import com.wmr.community.service.*;
 import com.wmr.community.util.CommunityConstant;
 import com.wmr.community.util.CommunityUtil;
 import com.wmr.community.util.HostHolder;
@@ -28,6 +29,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
@@ -61,6 +66,10 @@ public class UserController implements CommunityConstant {
 
     private FollowService followService;
 
+    private DiscussPostService discussPostService;
+
+    private CommentService commentService;
+
     private HostHolder hostHolder;
 
 
@@ -80,9 +89,20 @@ public class UserController implements CommunityConstant {
     }
 
     @Autowired
+    public void setDiscussPostService(DiscussPostService discussPostService) {
+        this.discussPostService = discussPostService;
+    }
+
+    @Autowired
+    public void setCommentService(CommentService commentService) {
+        this.commentService = commentService;
+    }
+
+    @Autowired
     public void setHostHolder(HostHolder hostHolder) {
         this.hostHolder = hostHolder;
     }
+
 
     @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
@@ -241,6 +261,83 @@ public class UserController implements CommunityConstant {
         }
         mv.addObject("hasFollowed", hasFollowed);
         mv.setViewName("/site/profile");
+        return mv;
+    }
+
+    // 我的帖子
+    @GetMapping(path = "/mypost/{userId}")
+    public ModelAndView getMyPost(@PathVariable("userId") int userId, Page page) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户的帖子不存在!");
+        }
+
+        // 设置page
+        page.setPath("/user/mypost/" + userId);
+        int postRows = discussPostService.findDiscussPostRows(userId);
+        page.setRows(postRows);
+
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("user", user);
+        mv.addObject("postRows", postRows);
+        List<DiscussPost> list = discussPostService.findDiscussPosts(userId, page.getOffset(), page.getLimit(), 0);
+        List<Map<String, Object>> discussPosts = new ArrayList<>();
+        if (list != null) {
+            for (DiscussPost discussPost : list) {
+                Map<String, Object> map = new HashMap<>();
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, discussPost.getId());
+                map.put("post", discussPost);
+                map.put("likeCount", likeCount);
+                discussPosts.add(map);
+            }
+        }
+        mv.addObject("page", page);
+        mv.addObject("discussPosts", discussPosts);
+        mv.setViewName("/site/my-post");
+        return mv;
+    }
+
+    // 我的回复
+    @GetMapping(path = "/myreply/{userId}")
+    public ModelAndView getMyReply(@PathVariable("userId") int userId, Page page) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户的回复不存在!");
+        }
+
+        // 设置page
+        page.setPath("/user/myreply/" + userId);
+        int commentCount = commentService.findCommentCountByUserId(userId);
+        page.setRows(commentCount);
+        ModelAndView mv = new ModelAndView();
+        mv.addObject("commentCount", commentCount);
+        mv.addObject("user", user);
+
+        List<Comment> list = commentService.findCommentByUserId(userId, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> comments = new ArrayList<>();
+        if (list != null) {
+            for (Comment comment : list) {
+                Map<String, Object> map = new HashMap<>();
+                // 表示评论
+                if (comment.getEntityType() == 1) {
+                    DiscussPost discussPost = discussPostService.findDiscussPostById(comment.getEntityId());
+                    map.put("postId", discussPost.getId());
+                    map.put("replyContent", discussPost.getContent());
+                }
+                // 表示回复
+                if (comment.getEntityType() == 2) {
+                    Comment commentReply = commentService.findCommentById(comment.getEntityId());
+                    map.put("replyContent", commentReply.getContent());
+                    DiscussPost discussPost = discussPostService.findDiscussPostById(commentReply.getEntityId());
+                    map.put("postId", discussPost.getId());
+                }
+                map.put("comment", comment);
+                comments.add(map);
+            }
+        }
+        mv.addObject("page", page);
+        mv.addObject("comments", comments);
+        mv.setViewName("/site/my-reply");
         return mv;
     }
 }
