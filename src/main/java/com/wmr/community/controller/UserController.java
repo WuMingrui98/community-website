@@ -1,5 +1,7 @@
 package com.wmr.community.controller;
 
+import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
 import com.wmr.community.annotation.LoginRequired;
 import com.wmr.community.entity.User;
 import com.wmr.community.service.FollowService;
@@ -14,10 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -39,6 +39,18 @@ public class UserController implements CommunityConstant {
 
     @Value("${community.path.head-picture}")
     private String picPath;
+
+    @Value("${qiniu.key.access}")
+    private String accessKey;
+
+    @Value("${qiniu.key.secret}")
+    private String secretKey;
+
+    @Value("${qiniu.bucket.header.name}")
+    private String headerBucketName;
+
+    @Value("${qiniu.bucket.header.url}")
+    private String headerBucketUrl;
 
     @Value("${community.path.domain}")
     private String domain;
@@ -74,11 +86,38 @@ public class UserController implements CommunityConstant {
 
     @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
-    public String getSettingPage(){
+    public String getSettingPage(Model model){
+        // 上传文件名称
+        String filename = CommunityUtil.generateUUID();
+        // 设置犀牛云的响应信息
+        StringMap policy = new StringMap();
+        policy.put("returnBody", CommunityUtil.getJSONString(0));
+        // 生成上传凭证
+        Auth auth = Auth.create(accessKey, secretKey);
+        String uploadToken = auth.uploadToken(headerBucketName, filename, 3600, policy);
+        model.addAttribute("uploadToken", uploadToken);
+        model.addAttribute("filename", filename);
         return "/site/setting";
     }
 
+    @PostMapping(path = "/header/url")
+    @ResponseBody
+    public String updateHeaderUrl(@RequestParam(value = "filename") String filename) {
+        String headerUrl = headerBucketUrl + "/" + filename;
+        // 更新一下数据库中
+        User user = hostHolder.getUser();
+        int userId = user.getId();
+        int res = userService.updateHeader(userId, headerUrl);
+        if (res != 1) {
+            logger.error("更新头像失败!");
+            return CommunityUtil.getJSONString(1, "更新头像失败!");
+        }
+        else return CommunityUtil.getJSONString(0);
+    }
+
+
     // 需要通过MultipartFile处理上传文件
+    @Deprecated
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public ModelAndView uploadHeadPicture(@RequestParam(name = "head") MultipartFile headPicture) {
         ModelAndView mv = new ModelAndView();
