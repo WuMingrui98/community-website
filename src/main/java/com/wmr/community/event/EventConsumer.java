@@ -12,9 +12,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +24,12 @@ import java.util.Map;
 @Component
 public class EventConsumer implements CommunityConstant {
     private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
+
+    @Value("${wk.image.command}")
+    private String wkImageCommand;
+
+    @Value("${wk.image.storage}")
+    private String wkImageStorage;
 
     private MessageService messageService;
 
@@ -110,5 +118,37 @@ public class EventConsumer implements CommunityConstant {
 
         DiscussPost discussPost = discussPostService.findDiscussPostById(event.getEntityId());
         elasticsearchService.deleteDiscussPost(discussPost);
+    }
+
+
+    // 处理分享事件的回调函数
+    @KafkaListener(topics = TOPIC_SHARE)
+    public void handleShareMessage(ConsumerRecord<String, String> record) throws InterruptedException {
+        if (record == null || record.value() == null) {
+            logger.error("消息内容为空!");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value(), Event.class);
+        if (event == null) {
+            logger.error("消息格式错误!");
+            return;
+        }
+
+        String htmlUrl = (String) event.getData().get("htmlUrl");
+        String filename = (String) event.getData().get("filename");
+        String suffix = (String) event.getData().get("suffix");
+
+        String cmd = wkImageCommand + " --quality 75 "
+                + htmlUrl + " " + wkImageStorage + "/" + filename + suffix;
+        System.out.println(cmd);
+        try {
+            Runtime.getRuntime().exec(cmd);
+            Thread.sleep(1000);
+            logger.info("生成长图成功!");
+        } catch (IOException e) {
+            logger.error("生成长图失败!" + e.getMessage());
+        }
+
+
     }
 }
