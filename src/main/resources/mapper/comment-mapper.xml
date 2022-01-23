@@ -11,6 +11,19 @@
         user_id, entity_type, entity_id, target_id, content, status, create_time
     </sql>
 
+    <select id="seletCommentsByUserId" resultType="Comment">
+        SELECT
+        <include refid="selectFields"/>
+        FROM
+        `comment`
+        WHERE
+        user_id = #{userId}
+        AND `status` = 0
+        ORDER BY
+        create_time ASC
+        LIMIT #{offset}, #{limit};
+    </select>
+
     <select id="selectComments" resultType="Comment">
         SELECT
         <include refid="selectFields"/>
@@ -42,6 +55,13 @@
         FROM `comment`
         WHERE entity_type = #{entityType}
           AND entity_id = #{entityId}
+          AND `status` = 0;
+    </select>
+
+    <select id="selectCountByUserId" resultType="int">
+        SELECT COUNT(id)
+        FROM `comment`
+        WHERE user_id = #{userId}
           AND `status` = 0;
     </select>
 
