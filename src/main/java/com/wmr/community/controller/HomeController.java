@@ -10,6 +10,7 @@ import com.wmr.community.service.UserService;
 import com.wmr.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,11 @@ public class HomeController implements CommunityConstant {
     @Autowired
     public void setLikeService(LikeService likeService) {
         this.likeService = likeService;
+    }
+
+    @GetMapping(path = "/")
+    public String getRoot() {
+        return "forward:index";
     }
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)

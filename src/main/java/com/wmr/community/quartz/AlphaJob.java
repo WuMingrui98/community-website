@@ -1,4 +1,4 @@
-package com.wmr.quartz;
+package com.wmr.community.quartz;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

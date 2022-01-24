@@ -1,14 +1,13 @@
 package com.wmr.community.config;
 
-import com.wmr.quartz.AlphaJob;
-import com.wmr.quartz.PostScoreScoreRefreshJob;
+import com.wmr.community.quartz.AlphaJob;
+import com.wmr.community.quartz.PostScoreScoreRefreshJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
-import org.springframework.security.core.parameters.P;
 
 
 // 配置->数据库->调用

@@ -1,4 +1,4 @@
-package com.wmr.quartz;
+package com.wmr.community.quartz;
 
 import com.wmr.community.entity.DiscussPost;
 import com.wmr.community.service.DiscussPostService;
